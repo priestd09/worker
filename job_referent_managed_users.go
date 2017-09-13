@@ -85,6 +85,7 @@ func ReferentManagedUsers() {
 				n.created_at
 			FROM newsletter_subscriptions n
 			WHERE LENGTH(n.postal_code) = 5
+			AND deleted_at IS NULL
 	`); err != nil {
 		panic(err)
 	}
@@ -100,6 +101,20 @@ func ReferentManagedUsers() {
 	ReferentManagedUsersPrint("Removing expired data")
 
 	if _, err := db.Exec(`DELETE FROM projection_referent_managed_users WHERE status >= 2`); err != nil {
+		panic(err)
+	}
+
+	// Removing unsubscribed people
+	ReferentManagedUsersPrint("Removing unsubscribed people")
+	if _, err := db.Exec(`
+		DELETE FROM projection_referent_managed_users
+		WHERE type = 'newsletter'
+		AND email IN (
+			SELECT n.email
+			FROM newsletter_subscriptions n
+			WHERE n.deleted_at IS NOT NULL
+		)
+	`); err != nil {
 		panic(err)
 	}
 
