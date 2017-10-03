@@ -22,7 +22,7 @@ func ReferentManagedUsers() {
 
 	if _, err := db.Exec(`
 		INSERT INTO projection_referent_managed_users
-		(status, type, original_id, email, postal_code, city, country, first_name, last_name, age, phone, committees, is_committee_member, is_committee_host, is_mail_subscriber, created_at)
+		(status, type, original_id, email, postal_code, city, country, first_name, last_name, age, phone, committees, is_committee_member, is_committee_host, is_committee_supervisor, is_mail_subscriber, created_at)
 			SELECT
 				0,
 				'adherent',
@@ -51,7 +51,13 @@ func ReferentManagedUsers() {
 					SELECT COUNT(cm.id) > 0
 					FROM committees_memberships cm
 					LEFT JOIN committees c ON cm.committee_uuid = c.uuid
-					WHERE cm.adherent_id = a.id AND c.status = 'APPROVED' AND (cm.privilege = 'SUPERVISOR' OR cm.privilege = 'HOST')
+					WHERE cm.adherent_id = a.id AND c.status = 'APPROVED' AND cm.privilege = 'HOST'
+				),
+				(
+					SELECT COUNT(cm.id) > 0
+					FROM committees_memberships cm
+					LEFT JOIN committees c ON cm.committee_uuid = c.uuid
+					WHERE cm.adherent_id = a.id AND c.status = 'APPROVED' AND cm.privilege = 'SUPERVISOR'
 				),
 				a.referents_emails_subscription,
 				a.registered_at
@@ -65,7 +71,7 @@ func ReferentManagedUsers() {
 
 	if _, err := db.Exec(`
 		INSERT INTO projection_referent_managed_users
-		(status, type, original_id, email, postal_code, city, country, first_name, last_name, age, phone, committees, is_committee_member, is_committee_host, is_mail_subscriber, created_at)
+		(status, type, original_id, email, postal_code, city, country, first_name, last_name, age, phone, committees, is_committee_member, is_committee_host, is_committee_supervisor, is_mail_subscriber, created_at)
 			SELECT
 				0,
 				'newsletter',
@@ -79,6 +85,7 @@ func ReferentManagedUsers() {
 				NULL,
 				NULL,
 				'',
+				0,
 				0,
 				0,
 				1,
