@@ -66,37 +66,6 @@ func ReferentManagedUsers() {
 		panic(err)
 	}
 
-	// Newsletter
-	ReferentManagedUsersPrint("Inserting newsletter subscriptions")
-
-	if _, err := db.Exec(`
-		INSERT INTO projection_referent_managed_users
-		(status, type, original_id, email, postal_code, city, country, first_name, last_name, age, phone, committees, is_committee_member, is_committee_host, is_committee_supervisor, is_mail_subscriber, created_at)
-			SELECT
-				0,
-				'newsletter',
-				n.id,
-				n.email,
-				n.postal_code,
-				NULL,
-				NULL,
-				NULL,
-				NULL,
-				NULL,
-				NULL,
-				'',
-				0,
-				0,
-				0,
-				1,
-				n.created_at
-			FROM newsletter_subscriptions n
-			WHERE LENGTH(n.postal_code) = 5
-			AND deleted_at IS NULL
-	`); err != nil {
-		panic(err)
-	}
-
 	// Switching data source
 	ReferentManagedUsersPrint("Switching front-end data source")
 
@@ -108,20 +77,6 @@ func ReferentManagedUsers() {
 	ReferentManagedUsersPrint("Removing expired data")
 
 	if _, err := db.Exec(`DELETE FROM projection_referent_managed_users WHERE status >= 2`); err != nil {
-		panic(err)
-	}
-
-	// Removing unsubscribed people
-	ReferentManagedUsersPrint("Removing unsubscribed people")
-	if _, err := db.Exec(`
-		DELETE FROM projection_referent_managed_users
-		WHERE type = 'newsletter'
-		AND email IN (
-			SELECT n.email
-			FROM newsletter_subscriptions n
-			WHERE n.deleted_at IS NOT NULL
-		)
-	`); err != nil {
 		panic(err)
 	}
 
