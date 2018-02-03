@@ -22,11 +22,13 @@ func main() {
 
 	c := cron.New()
 	c.AddFunc("@every 2h", ReferentManagedUsers)
-	c.AddFunc("0 3 * * *", ClearEmails) // Every day at 3 am
+	c.AddFunc("0 3 * * *", ClearEmails)                 // Every day at 3 am
+	c.AddFunc("0 4 * * *", ClearAdherentActivationKeys) // Every day at 4 am
 	c.Start()
 
 	ReferentManagedUsers()
 	ClearEmails()
+	ClearAdherentActivationKeys()
 
 	for {
 		time.Sleep(time.Second * time.Duration(heartbeatInterval))
