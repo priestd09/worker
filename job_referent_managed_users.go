@@ -60,7 +60,7 @@ func ReferentManagedUsers() {
 					WHERE cm.adherent_id = a.id AND c.status = 'APPROVED' AND cm.privilege = 'SUPERVISOR'
 				),
 				(
-				    SELECT GROUP_CONCAT(tag.name SEPARATOR ',')
+				    SELECT GROUP_CONCAT(tag.code SEPARATOR ',')
 				    FROM referent_tags tag
 				    INNER JOIN referent_managed_areas_tags managed_area_tag ON managed_area_tag.referent_tag_id = tag.id
 				    WHERE managed_area_tag.referent_managed_area_id = a.managed_area_id
