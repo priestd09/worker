@@ -22,7 +22,7 @@ func ReferentManagedUsers() {
 
 	if _, err := db.Exec(`
 		INSERT INTO projection_referent_managed_users
-		(status, type, original_id, email, postal_code, city, country, first_name, last_name, age, phone, committees, is_committee_member, is_committee_host, is_committee_supervisor, is_mail_subscriber, created_at)
+		(status, type, original_id, email, postal_code, city, country, first_name, last_name, age, phone, committees, is_committee_member, is_committee_host, is_committee_supervisor, subscribed_tags, is_mail_subscriber, created_at)
 			SELECT
 				0,
 				'adherent',
@@ -58,6 +58,12 @@ func ReferentManagedUsers() {
 					FROM committees_memberships cm
 					LEFT JOIN committees c ON cm.committee_uuid = c.uuid
 					WHERE cm.adherent_id = a.id AND c.status = 'APPROVED' AND cm.privilege = 'SUPERVISOR'
+				),
+				(
+				    SELECT GROUP_CONCAT(tag.name SEPARATOR ',')
+				    FROM referent_tags tag
+				    INNER JOIN referent_managed_areas_tags managed_area_tag ON managed_area_tag.referent_tag_id = tag.id
+				    WHERE managed_area_tag.referent_managed_area_id = a.managed_area_id
 				),
 				a.referents_emails_subscription,
 				a.registered_at
