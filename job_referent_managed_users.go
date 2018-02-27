@@ -22,7 +22,7 @@ func ReferentManagedUsers() {
 
 	if _, err := db.Exec(`
 		INSERT INTO projection_referent_managed_users
-		(status, type, original_id, email, postal_code, city, country, first_name, last_name, age, phone, committees, is_committee_member, is_committee_host, is_committee_supervisor, is_mail_subscriber, created_at)
+		(status, type, original_id, email, postal_code, city, country, first_name, last_name, age, phone, committees, is_committee_member, is_committee_host, is_committee_supervisor, committee_postal_code, is_mail_subscriber, created_at)
 			SELECT
 				0,
 				'adherent',
@@ -58,6 +58,13 @@ func ReferentManagedUsers() {
 					FROM committees_memberships cm
 					LEFT JOIN committees c ON cm.committee_uuid = c.uuid
 					WHERE cm.adherent_id = a.id AND c.status = 'APPROVED' AND cm.privilege = 'SUPERVISOR'
+				),
+				(
+					SELECT c.address_postal_code
+					FROM committees c
+					JOIN committees_memberships cm ON c.uuid = cm.committee_uuid
+					WHERE cm.adherent_id = a.id AND c.status = 'APPROVED' AND cm.privilege = 'SUPERVISOR'
+					LIMIT 1
 				),
 				a.referents_emails_subscription,
 				a.registered_at
