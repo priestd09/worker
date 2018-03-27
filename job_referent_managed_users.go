@@ -66,7 +66,7 @@ func ReferentManagedUsers() {
 					WHERE cm.adherent_id = a.id AND c.status = 'APPROVED' AND cm.privilege = 'SUPERVISOR'
 					LIMIT 1
 				),
-				a.referents_emails_subscription,
+				IF(FIND_IN_SET('subscribed_emails_referents', a.emails_subscriptions), 1, 0),
 				a.registered_at
 			FROM adherents a
 	`); err != nil {
